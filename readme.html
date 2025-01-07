@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magento Installation Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="max-w-5xl mx-auto p-8">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-blue-700">Magento Installation Guide</h1>
+            <p class="text-gray-600 mt-2">A comprehensive guide to setting up Magento in a Dockerized environment.</p>
+        </header>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800">Prerequisites</h2>
+            <ul class="list-disc list-inside mt-4 text-gray-700">
+                <li>Docker and Docker Compose installed on your system.</li>
+                <li>A valid Magento Marketplace account with access keys.</li>
+                <li>Pre-generated SSL certificates placed in the <code class="bg-gray-100 px-1 rounded">./certs</code> folder.</li>
+            </ul>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800">Step 1: Start Docker Containers</h2>
+            <pre class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto text-sm">
+# Start Docker containers
+$ docker compose up --build
+            </pre>
+            <p class="mt-2 text-gray-700">This command will build and start all necessary services including MySQL, PHP, Redis, Elasticsearch, and Nginx.</p>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800">Step 2: Access the PHP Container</h2>
+            <pre class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto text-sm">
+# Log in to the PHP container
+$ docker exec -it magento-php bash
+            </pre>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800">Step 3: Install Magento</h2>
+            <p class="text-gray-700">Run the following commands inside the PHP container:</p>
+            <pre class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto text-sm">
+# Create Magento project and install
+composer create-project --no-progress --prefer-dist --repository=https://repo.magento.com/ magento/project-community-edition  . && \
+if mv project-community-edition/* .; then
+    rm -rf project-community-edition
+else
+    echo "Failed to move files from project-community-edition"
+    exit 1
+fi && \
+php bin/magento setup:install \
+    --base-url=http://local.magento.com \
+    --base-url-secure=https://local.magento.com \
+    --use-secure=1 \
+    --use-secure-admin=1 \
+    --db-host=mysql \
+    --db-name=magento \
+    --db-user=magento \
+    --db-password=magento \
+    --admin-firstname=admin \
+    --admin-lastname=admin \
+    --admin-email=admin@example.com \
+    --admin-user=admin \
+    --admin-password=admin123 \
+    --language=en_US \
+    --currency=USD \
+    --timezone=America/New_York \
+    --use-rewrites=1 \
+    --search-engine=elasticsearch7 \
+    --elasticsearch-host=elasticsearch \
+    --elasticsearch-port=9200 \
+    --session-save=redis \
+    --session-save-redis-host=redis \
+    --session-save-redis-port=6379 \
+    --cache-backend=redis \
+    --cache-backend-redis-server=redis \
+    --cache-backend-redis-db=0 \
+    --page-cache=redis \
+    --page-cache-redis-server=redis \
+    --page-cache-redis-port=6379 \
+    --page-cache-redis-db=1
+            </pre>
+
+            <p class="text-gray-700 mt-4">Default credentials for Magento admin:</p>
+            <ul class="list-disc list-inside text-gray-700">
+                <li><strong>Username:</strong> <code class="bg-gray-100 px-1 rounded">admin</code></li>
+                <li><strong>Password:</strong> <code class="bg-gray-100 px-1 rounded">admin123</code></li>
+            </ul>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800">Step 4: Deploy Sample Data (Optional)</h2>
+            <p class="text-gray-700">If you want to deploy Magento sample data, follow these steps:</p>
+            <pre class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto text-sm">
+php bin/magento sampledata:deploy && \
+php bin/magento setup:upgrade && \
+php bin/magento cache:flush
+            </pre>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800">Step 5: Set Magento to Production Mode</h2>
+            <pre class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto text-sm">
+# Enable production mode
+php bin/magento deploy:mode:set production --progress
+            </pre>
+            <p class="text-gray-700 mt-2">This will optimize Magento for performance and deploy static content.</p>
+        </section>
+
+        <footer class="text-center text-gray-500 mt-16">
+            <p>&copy; 2025 Magento Installation Guide. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
