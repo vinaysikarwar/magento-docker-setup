@@ -2,7 +2,7 @@
 
 # Step 1: Create Magento Project
 echo "Creating Magento project..."
-composer create-project --no-progress --prefer-dist --repository=https://repo.magento.com/ magento/project-community-edition . || {
+composer create-project --no-progress --prefer-dist --repository=https://repo.magento.com/ magento/project-community-edition || {
     echo "Error: Failed to create Magento project."
     exit 1
 }
