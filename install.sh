@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Step 1: Create Magento Project
-echo "Creating Magento project..."
-composer create-project --no-progress --prefer-dist --repository=https://repo.magento.com/ magento/project-community-edition || {
+echo "Creating Magento project in /var/www/html/magento2..."
+composer create-project --no-progress --prefer-dist --repository=https://repo.magento.com/ magento/project-community-edition magento2 || {
     echo "Error: Failed to create Magento project."
     exit 1
 }
