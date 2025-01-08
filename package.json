@@ -1,13 +1,13 @@
 {
   "name": "magento-docker-setup",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "An automated Docker setup for Magento 2 with MySQL, Redis, Elasticsearch, and Nginx.",
   "main": "index.js",
   "scripts": {
     "start": "docker-compose up --build",
     "stop": "docker-compose down",
     "logs": "docker-compose logs",
-    "install": "docker cp install.sh magento-php:/var/www/html/install.sh && docker exec magento-php bash -c 'sh /var/www/html/install.sh'",
+    "install": "docker exec magento-php bash -c 'rm -f /var/www/html/install.sh' && docker cp ./install.sh magento-php:/var/www/html/install.sh && docker exec magento-php bash -c 'chmod +x /var/www/html/install.sh && sh /var/www/html/install.sh'",
     "setup": "npm run start && npm run install",
     "flush-cache": "docker exec magento-php bash -c 'bin/magento cache:flush'",
     "deploy-sampledata": "docker exec magento-php bash -c 'bin/magento sampledata:deploy'",
