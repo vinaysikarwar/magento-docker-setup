@@ -1,6 +1,6 @@
 {
   "name": "magento-docker-setup",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "An automated Docker setup for Magento 2 with MySQL, Redis, Elasticsearch, and Nginx.",
   "main": "index.js",
   "scripts": {
@@ -8,11 +8,12 @@
     "stop": "docker-compose down",
     "logs": "docker-compose logs",
     "install": "docker exec magento-php bash -c 'rm -f /var/www/html/install.sh' && docker cp ./install.sh magento-php:/var/www/html/install.sh && docker exec magento-php bash -c 'chmod +x /var/www/html/install.sh && sh /var/www/html/install.sh'",
-    "setup": "npm run start && npm run install",
+    "setup": "npm run start && sleep 10 && npm run install",
     "flush-cache": "docker exec magento-php bash -c 'bin/magento cache:flush'",
     "deploy-sampledata": "docker exec magento-php bash -c 'bin/magento sampledata:deploy'",
     "restart": "npm run stop && npm run start",
-    "status": "docker ps"
+    "status": "docker ps",
+    "check-container": "docker inspect -f '{{.State.Running}}' magento-php"
   },
   "repository": {
     "type": "git",

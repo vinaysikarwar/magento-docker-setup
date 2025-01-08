@@ -1,23 +1,47 @@
 #!/bin/bash
 
-# Step 1: Create Magento Project
-echo "Creating Magento project in /var/www/html/magento2..."
-composer create-project --no-progress --prefer-dist --repository=https://repo.magento.com/ magento/project-community-edition magento2 || {
+# Define paths
+MAGENTO_DIR="/var/www/html/magento"
+INSTALL_DIR="/var/www/html"
+
+# Step 1: Ensure the Magento directory is clean
+echo "Ensuring Magento installation directory ($MAGENTO_DIR) is clean..."
+if [ -d "$MAGENTO_DIR" ]; then
+    rm -rf "$MAGENTO_DIR/*"
+else
+    mkdir -p "$MAGENTO_DIR"
+fi
+
+echo "Copying auth.json to the container..."
+docker cp ./auth.json magento-php:/root/.composer/auth.json || {
+    echo "Error: Failed to copy auth.json to the container."
+    exit 1
+}
+
+# Step 2: Create Magento Project
+echo "Creating Magento project in $MAGENTO_DIR..."
+composer create-project --no-progress --prefer-dist --repository=https://repo.magento.com/ magento/project-community-edition $MAGENTO_DIR || {
     echo "Error: Failed to create Magento project."
     exit 1
 }
 
-# Step 2: Move Files from Project Directory (if exists)
-if [ -d "project-community-edition" ]; then
-    echo "Moving files from project-community-edition to the current directory..."
-    mv project-community-edition/* . || {
-        echo "Error: Failed to move files from project-community-edition."
-        exit 1
-    }
-    rm -rf project-community-edition
-fi
+# Step 3: Move Files to Installation Directory
+echo "Moving Magento files from $MAGENTO_DIR to $INSTALL_DIR..."
+cd $MAGENTO_DIR || {
+    echo "Error: Failed to switch to Magento installation directory."
+    exit 1
+}
+mv * ../ || {
+    echo "Error: Failed to move files to $INSTALL_DIR."
+    exit 1
+}
+rm -rf $MAGENTO_DIR
 
-# Step 3: Magento Setup Installation
+# Step 4: Magento Setup Installation
+cd $INSTALL_DIR || {
+    echo "Error: Failed to switch to Magento installation directory."
+    exit 1
+}
 echo "Starting Magento setup installation..."
 php bin/magento setup:install \
     --base-url=http://local.magento.com \
@@ -54,7 +78,7 @@ php bin/magento setup:install \
         exit 1
     }
 
-# Step 4: Optional Sample Data Deployment
+# Step 5: Optional Sample Data Deployment
 read -p "Do you want to deploy sample data? (y/n): " deploy_sampledata
 if [ "$deploy_sampledata" == "y" ]; then
     echo "Deploying sample data..."
@@ -64,14 +88,14 @@ if [ "$deploy_sampledata" == "y" ]; then
     }
 fi
 
-# Step 5: Final Setup Commands
+# Step 6: Final Setup Commands
 echo "Running setup upgrade and cache flush..."
 [ -d "generated" ] && rm -rf generated/* # Clear generated directory
 php bin/magento setup:upgrade || { echo "Error: Setup upgrade failed."; exit 1; }
 php bin/magento cache:flush || { echo "Error: Cache flush failed."; exit 1; }
 rm -rf generated/*
 
-# Step 6: Set Magento to Production Mode
+# Step 7: Set Magento to Production Mode
 echo "Setting Magento to production mode..."
 php bin/magento deploy:mode:set production --progress || {
     echo "Error: Failed to set production mode."
