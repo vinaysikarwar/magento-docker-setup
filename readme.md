@@ -23,7 +23,7 @@ Before you begin, ensure you have the following installed:
 
 ### 1. Clone the Repository
 ```sh
-git clone https://github.com/your-username/magento-docker-setup.git
+git clone https://github.com/vinaysikarwar/magento-docker-setup.git
 cd magento-docker-setup
 ```
 

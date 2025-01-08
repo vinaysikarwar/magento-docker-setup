@@ -37,6 +37,7 @@ services:
     container_name: magento-php
     volumes:
       - ./magento:/var/www/html
+      - ./install.sh:/var/www/html/install.sh  # Mount install.sh inside the container
     networks:
       - magento
     environment:
